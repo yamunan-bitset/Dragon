@@ -1,18 +1,17 @@
 #include <SFML/Graphics.hpp>
 
+#define ROWS 20
+#define COLS 20
+
 class Map
 {
 public:
-  Map(int, int);
-  void draw(sf::RenderWindow&);
-  const char* asset_file = "tile_map.png"; // Set default, can be changed.
-private:
-  void init();
-  unsigned rows, cols;
-  int map[rows][cols];
-  const int width;
-  const int height;
-  sf::Texture tile_sheet;
+  Map();
+  int width = 32, height = 32;
+  int map[ROWS][COLS];
   sf::Sprite tile;
   sf::IntRect path, grass, stone, box;
+private:
+  sf::Texture tile_sheet;
+  void init();
 };

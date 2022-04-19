@@ -1,55 +1,35 @@
 #include "map.hh"
 
 Map::Map()
-  : this->width(32), this->height(32),
-  this->rows(20), this->cols(20)
 {
-  map[this->rows][this->cols] =
+  this->tile_sheet.loadFromFile("assets/tilemap.png");
+  this->tile.setTexture(this->tile_sheet);
+  this->init();
+  int map[ROWS][COLS] =
     {
 #include "assets/map1.inc"
     };
-  this->tile_sheet.loadFromFile(this->asset_file);
-  this->tile.setTexture(this->tile_sheet);
-  this->init();
 }
 
-void init()
+void Map::init()
 {
-  path.left = 0;
-  path.top = 0;
-  path.width = this->width;
-  path.height = this->height;
+  this->grass.left = 0;
+  this->grass.top = 0;
+  this->grass.width = this->width;
+  this->grass.height = this->height;
 
-  path.left = 32;
-  path.top = 0;
-  path.width = this->width;
-  path.height = this->height;
+  this->path.left = 32;
+  this->path.top = 0;
+  this->path.width = this->width;
+  this->path.height = this->height;
 
-  stone.left = 0;
-  stone.top = 32;
-  stone.width = this->width;
-  stone.height = this->height;
+  this->stone.left = 0;
+  this->stone.top = 32;
+  this->stone.width = this->width;
+  this->stone.height = this->height;
 
-  Box.left = 32;
-  Box.top = 32;
-  Box.width = this->width;
-  Box.height = this->height;
-}
-
-void Map::draw(sf::RenderWindow& window)
-{
-  sf::IntRect tmp;
-  for (unsigned c = 0; c < this->cols; c++)
-    for (unsigned r = 0; c < this->rows; r++)
-      {
-	switch (map[r][c])
-	  {
-	  case 0: tmp = path; break;
-	  case 1: tmp = grass; break;
-	  case 2: tmp = stone; break;
-	  case 3: tmp = box;
-	  }
-	this->tile.setTextureRect(tmp);
-	this->tile.setPosition((r * this->width), (w * this->height));
-      }
+  this->box.left = 32;
+  this->box.top = 32;
+  this->box.width = this->width;
+  this->box.height = this->height;
 }

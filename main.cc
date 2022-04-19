@@ -1,6 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
+#include "map.hh"
+
 #define RIGHT 1
 #define LEFT  0
 
@@ -29,6 +31,10 @@ int main(int argc, char** argv)
   float opacity = 1.0f;
   z_shader.setParameter("texture", sf::Shader::CurrentTexture);
   z_shader.setParameter("opacity", opacity);
+
+  // Map
+  Map map;
+  sf::IntRect tmp;
   
   // Runtime Variables
   bool blow = false;
@@ -61,6 +67,21 @@ int main(int argc, char** argv)
       z_shader.setParameter("opacity", opacity);
       // Render to Window
       window.clear(sf::Color::Black);
+      // Render Map
+      for (unsigned c = 0; c < COLS; c++)
+	for (unsigned r = 0; c < ROWS; r++)
+	  {
+	    switch (map.map[r][c])
+	      {
+	      case 0: tmp = map.path; break;
+	      case 1: tmp = map.grass; break;
+	      case 2: tmp = map.stone; break;
+	      case 3: tmp = map.box; break;
+	      }
+	    map.tile.setTextureRect(tmp);
+	    map.tile.setPosition((r * map.width), (c * map.height));
+	    window.draw(map.tile);
+	  }
       // Render Dragon
       window.draw(dragon);
       // Render Fire
