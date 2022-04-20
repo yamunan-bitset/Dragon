@@ -6,19 +6,19 @@
 #define RIGHT 1
 #define LEFT  0
 
-#if 1 // 0
+#if 0 // 1
 #define __DRAGON__DEBUG__
+#endif
 #ifdef __DRAGON__DEBUG__
 #define DEBUG(x) std::cout << "Reached: " << x << std::endl
 #else
 #define DEBUG(x) std::cout << ""
 #endif
-#endif
 
 int main(int argc, char** argv)
 {
   // Render Window
-  sf::Vector2i res = sf::Vector2i(800, 800);
+  sf::Vector2i res = sf::Vector2i(1000, 1000);
   sf::RenderWindow window(sf::VideoMode(res.x, res.y), "Dragon");
 
   // Dragon Sprite
@@ -43,15 +43,16 @@ int main(int argc, char** argv)
   float opacity = 1.0f;
   z_shader.setParameter("texture", sf::Shader::CurrentTexture);
   z_shader.setParameter("opacity", opacity);
-
+  sf::Texture blank_zombie_dead;
+  blank_zombie_dead.create(32, 32);
+  
   // Map
   DEBUG("Map Setup");
   Map map;
   sf::IntRect tmp;
   
   // Runtime Variables
-  bool blow = false;
-  bool dir;
+  bool blow = false, dir, hit = false, hit2_dead = false;
   sf::Event event;
   sf::Clock f_clock, z_clock;
 
@@ -82,8 +83,8 @@ int main(int argc, char** argv)
       window.clear(sf::Color::Black);
       // Render Map
       DEBUG("Map Render");
-      for (unsigned r = 0; r < ROWS ; r++)
-	for (unsigned c = 0; c < COLS ; c++)
+      for (unsigned c = 0; c < COLS ; c++)
+	for (unsigned r = 0; r < ROWS ; r++)
 	  {
 	    switch (map.map[r][c])
 	      {
@@ -99,22 +100,40 @@ int main(int argc, char** argv)
       // Render Dragon
       DEBUG("Dragon Render");
       window.draw(dragon);
-      // Render Fire
+      // Calculate Fire Position
       DEBUG("Fire Render");
       if (blow)
 	{
-	  if (dir == RIGHT)
+	  switch (dir)
 	    {
+	    case RIGHT:
 	      fire.setScale(1.0f, 1.0f);
 	      fire.setPosition(dragon.getPosition().x+64, dragon.getPosition().y+20);
-	    }
-	  if (dir == LEFT)
-	    {
+	      break;
+	    case LEFT: 
 	      fire.setScale(-1.0f, 1.0f);
 	      fire.setPosition(dragon.getPosition().x-64, dragon.getPosition().y+20);
+	      break;
 	    }
+	  // Collision Detection
+	  DEBUG("Collision Detection");
+	  /*
+	    if (fire.getPosition().x <= zombie.getPosition().x+zombie.getScale().x &&
+	      fire.getPosition().x+fire.getScale().x >= zombie.getPosition().x &&
+	      fire.getPosition().y <= zombie.getPosition().y+zombie.getScale().y &&
+	      fire.getPosition().y+fire.getScale().y >= zombie.getPosition().y)
+	    { std::cout << "Collision!!" << std::endl; hit = true; }
+	  */
+	  if (fire.getGlobalBounds().intersects(zombie.getGlobalBounds()))
+	    {
+	      DEBUG("Collision!!! Zombie State: Paralysed!!!");
+	      if (hit) hit2_dead = true;
+	      else  hit = true;
+	    }
+	  // Render Fire
 	  window.draw(fire);
-	  if (f_clock.getElapsedTime().asSeconds() > (float) 1) { blow = false; f_clock.restart(); }
+	  // Only blow for 1 second
+	  if (f_clock.getElapsedTime().asSeconds() > 1.0) { blow = false; f_clock.restart(); }
 	}
       DEBUG("Zombie Render");
       // Render Zombie
@@ -125,7 +144,11 @@ int main(int argc, char** argv)
 	  z_clock.restart();
 	  z_shader.setParameter("opacity", opacity);
 	}
-      window.draw(zombie, &z_shader);
+      if (hit)
+	if (hit2_dead) zombie.setTexture(blank_zombie_dead);
+	else
+	  window.draw(zombie, &z_shader);
+      else window.draw(zombie);
       // Render Window
       window.display();
     }

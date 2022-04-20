@@ -23,13 +23,13 @@ void Map::init()
   this->path.width = this->width;
   this->path.height = this->height;
 
-  this->stone.left = 0;
-  this->stone.top = 32;
+  this->stone.left = 64;
+  this->stone.top = 0;
   this->stone.width = this->width;
   this->stone.height = this->height;
 
-  this->box.left = 32;
-  this->box.top = 32;
+  this->box.left = 96;
+  this->box.top = 0;
   this->box.width = this->width;
   this->box.height = this->height;
 }
