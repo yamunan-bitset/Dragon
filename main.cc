@@ -144,11 +144,16 @@ int main(int argc, char** argv)
 	  z_clock.restart();
 	  z_shader.setParameter("opacity", opacity);
 	}
+      if (rand() % 2 == 1) 
+	zombie.setPosition(zombie.getPosition().x+(rand()%10)/5, zombie.getPosition().y+(rand()%10)/5);
+      else
+	zombie.setPosition(zombie.getPosition().x-(rand()%10)/5, zombie.getPosition().y-(rand()%10)/5);
       if (hit)
 	if (hit2_dead) zombie.setTexture(blank_zombie_dead);
 	else
 	  window.draw(zombie, &z_shader);
-      else window.draw(zombie);
+      else
+	  window.draw(zombie);
       // Render Window
       window.display();
     }
