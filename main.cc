@@ -1,10 +1,14 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 
 #include "map.hh"
 
 #define RIGHT 1
 #define LEFT  0
+#define XMOVE 1
+#define YMOVE 0
 
 #if 0 // 1
 #define __DRAGON__DEBUG__
@@ -17,8 +21,9 @@
 
 int main(int argc, char** argv)
 {
+  std::srand(std::time(NULL));
   // Render Window
-  sf::Vector2i res = sf::Vector2i(1000, 1000);
+  sf::Vector2i res = sf::Vector2i(800, 800);
   sf::RenderWindow window(sf::VideoMode(res.x, res.y), "Dragon");
 
   // Dragon Sprite
@@ -52,9 +57,10 @@ int main(int argc, char** argv)
   sf::IntRect tmp;
   
   // Runtime Variables
-  bool blow = false, dir, hit = false, hit2_dead = false;
+  bool blow = false, dir, dir_z, hit = false, hit2_dead = false;
   sf::Event event;
   sf::Clock f_clock, z_clock;
+  int new_v = 0;
 
   // Gameloop
   DEBUG("Gameloop");
@@ -144,10 +150,22 @@ int main(int argc, char** argv)
 	  z_clock.restart();
 	  z_shader.setParameter("opacity", opacity);
 	}
-      if (rand() % 2 == 1) 
-	zombie.setPosition(zombie.getPosition().x+(rand()%10)/5, zombie.getPosition().y+(rand()%10)/5);
-      else
-	zombie.setPosition(zombie.getPosition().x-(rand()%10)/5, zombie.getPosition().y-(rand()%10)/5);
+      switch (dir_z)
+	{
+	case XMOVE:
+	  zombie.setPosition(zombie.getPosition().x+1, zombie.getPosition().y);
+	  break;
+	case YMOVE:
+	  zombie.setPosition(zombie.getPosition().x, zombie.getPosition().y+1);
+	  break;
+	}
+      if (zombie.getPosition().x == 0) 
+      new_v--;
+      if (new_v == 0)
+	{
+	  new_v = (std::rand()%40)-20;
+	  dir_z = (std::rand()%2);
+	}
       if (hit)
 	if (hit2_dead) zombie.setTexture(blank_zombie_dead);
 	else
