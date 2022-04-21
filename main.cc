@@ -9,6 +9,8 @@
 #define LEFT  0
 #define XMOVE 1
 #define YMOVE 0
+#define POS   1
+#define NEG   0
 
 #if 0 // 1
 #define __DRAGON__DEBUG__
@@ -23,9 +25,10 @@ int main(int argc, char** argv)
 {
   std::srand(std::time(NULL));
   // Render Window
-  sf::Vector2i res = sf::Vector2i(800, 800);
+  sf::Vector2i res = sf::Vector2i(800, 600);
   sf::RenderWindow window(sf::VideoMode(res.x, res.y), "Dragon");
-
+  sf::FloatRect window_bounds(sf::Vector2f(0.f, 0.f), window.getDefaultView().getSize());
+  
   // Dragon Sprite
   DEBUG("Dragon Sprite");
   sf::Texture dragon_t;
@@ -43,6 +46,7 @@ int main(int argc, char** argv)
   sf::Texture zombie_t;
   zombie_t.loadFromFile("assets/zombie.png");
   sf::Sprite zombie(zombie_t);
+  zombie.setPosition(res.x/2, res.y/2);
   sf::Shader z_shader;
   z_shader.loadFromFile("assets/zombie.frag", sf::Shader::Fragment);
   float opacity = 1.0f;
@@ -57,10 +61,10 @@ int main(int argc, char** argv)
   sf::IntRect tmp;
   
   // Runtime Variables
-  bool blow = false, dir, dir_z, hit = false, hit2_dead = false;
+  bool blow = false, dir, dir_z, move_z, hit = false, hit2_dead = false;
   sf::Event event;
   sf::Clock f_clock, z_clock;
-  int new_v = 0;
+  int new_v = (std::rand()%40), vel = 0;
 
   // Gameloop
   DEBUG("Gameloop");
@@ -150,20 +154,36 @@ int main(int argc, char** argv)
 	  z_clock.restart();
 	  z_shader.setParameter("opacity", opacity);
 	}
+      vel = 0;
       switch (dir_z)
 	{
+	case NEG: vel = -1; break;
+	case POS: vel =  1; break;
+	default: break;
+	}
+      switch (move_z)
+	{
 	case XMOVE:
-	  zombie.setPosition(zombie.getPosition().x+1, zombie.getPosition().y);
+	  zombie.setPosition(zombie.getPosition().x+vel, zombie.getPosition().y);
 	  break;
 	case YMOVE:
-	  zombie.setPosition(zombie.getPosition().x, zombie.getPosition().y+1);
+	  zombie.setPosition(zombie.getPosition().x, zombie.getPosition().y+vel);
 	  break;
+	default: break;
 	}
-      if (zombie.getPosition().x == 0) 
+      // Set Zombie Position
+      sf::Vector2f position = zombie.getPosition();
+      position.x = std::max(position.x, window_bounds.left);
+      position.x = std::min(position.x, window_bounds.left + window_bounds.width - 32);
+      zombie.setPosition(position);
+      // Recalculate Velocity (if new_v == 0 or if zombie hits side)
       new_v--;
-      if (new_v == 0)
+      if (new_v == 0)/* ||
+	  zombie.getPosition().x == 0 || zombie.getPosition().x == res.x ||
+	  zombie.getPosition().y == 0 || zombie.getPosition().y == res.y)*/
 	{
-	  new_v = (std::rand()%40)-20;
+	  DEBUG("Recalculate Velocity");
+	  new_v = (std::rand()%40);
 	  dir_z = (std::rand()%2);
 	}
       if (hit)
