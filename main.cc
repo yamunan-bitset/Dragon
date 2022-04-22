@@ -2,15 +2,16 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 
 #include "map.hh"
 
-#define RIGHT 1
-#define LEFT  0
-#define XMOVE 1
-#define YMOVE 0
-#define POS   1
-#define NEG   0
+#define RIGHT true
+#define LEFT  false
+#define XMOVE true
+#define YMOVE false
+#define POS   true
+#define NEG   false
 
 #if 0 // 1
 #define __DRAGON__DEBUG__
@@ -20,6 +21,12 @@
 #else
 #define DEBUG(x) std::cout << ""
 #endif
+
+inline void randbool(bool& var)
+{
+  if (std::rand()%2 == 0) var = true;
+  else                    var = false;
+}
 
 int main(int argc, char** argv)
 {
@@ -62,6 +69,8 @@ int main(int argc, char** argv)
   
   // Runtime Variables
   bool blow = false, dir, dir_z, move_z, hit = false, hit2_dead = false;
+  randbool(dir_z);
+  randbool(move_z);
   sf::Event event;
   sf::Clock f_clock, z_clock;
   int new_v = (std::rand()%40), vel = 0;
@@ -172,19 +181,22 @@ int main(int argc, char** argv)
 	default: break;
 	}
       // Set Zombie Position
+      /*
       sf::Vector2f position = zombie.getPosition();
       position.x = std::max(position.x, window_bounds.left);
       position.x = std::min(position.x, window_bounds.left + window_bounds.width - 32);
       zombie.setPosition(position);
-      // Recalculate Velocity (if new_v == 0 or if zombie hits side)
+      */
       new_v--;
-      if (new_v == 0)/* ||
-	  zombie.getPosition().x == 0 || zombie.getPosition().x == res.x ||
-	  zombie.getPosition().y == 0 || zombie.getPosition().y == res.y)*/
+      // Recalculate Velocity (if new_v == 0 or if zombie hits side)
+      if (new_v == 0) /* ||
+			zombie.getPosition().x == 0 || zombie.getPosition().x == res.x ||
+			zombie.getPosition().y == 0 || zombie.getPosition().y == res.y)*/
 	{
 	  DEBUG("Recalculate Velocity");
 	  new_v = (std::rand()%40);
-	  dir_z = (std::rand()%2);
+	  randbool(dir_z);
+	  randbool(move_z);
 	}
       if (hit)
 	if (hit2_dead) zombie.setTexture(blank_zombie_dead);
