@@ -136,13 +136,6 @@ int main(int argc, char** argv)
 	    }
 	  // Collision Detection
 	  DEBUG("Collision Detection");
-	  /*
-	    if (fire.getPosition().x <= zombie.getPosition().x+zombie.getScale().x &&
-	      fire.getPosition().x+fire.getScale().x >= zombie.getPosition().x &&
-	      fire.getPosition().y <= zombie.getPosition().y+zombie.getScale().y &&
-	      fire.getPosition().y+fire.getScale().y >= zombie.getPosition().y)
-	    { std::cout << "Collision!!" << std::endl; hit = true; }
-	  */
 	  if (fire.getGlobalBounds().intersects(zombie.getGlobalBounds()))
 	    {
 	      DEBUG("Collision!!! Zombie State: Paralysed!!!");
@@ -180,18 +173,11 @@ int main(int argc, char** argv)
 	  break;
 	default: break;
 	}
-      // Set Zombie Position
-      /*
-      sf::Vector2f position = zombie.getPosition();
-      position.x = std::max(position.x, window_bounds.left);
-      position.x = std::min(position.x, window_bounds.left + window_bounds.width - 32);
-      zombie.setPosition(position);
-      */
       new_v--;
       // Recalculate Velocity (if new_v == 0 or if zombie hits side)
-      if (new_v == 0) /* ||
-			zombie.getPosition().x == 0 || zombie.getPosition().x == res.x ||
-			zombie.getPosition().y == 0 || zombie.getPosition().y == res.y)*/
+      if (new_v == 0 ||
+	  zombie.getPosition().x <= 0 || zombie.getPosition().x >= res.x ||
+	  zombie.getPosition().y <= 0 || zombie.getPosition().y >= res.y)
 	{
 	  DEBUG("Recalculate Velocity");
 	  new_v = (std::rand()%40);
