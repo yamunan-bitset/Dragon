@@ -1,6 +1,6 @@
 CXX  = g++
 OUT  = dragon
-LIBS = -lsfml-system -lsfml-window -lsfml-graphics
+LIBS = -lsfml-system -lsfml-window -lsfml-graphics -lsfml-audio
 OBJS = main.o map.o
 
 all: clear $(OBJS)

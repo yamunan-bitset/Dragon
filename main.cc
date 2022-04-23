@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -35,32 +36,45 @@ int main(int argc, char** argv)
   sf::Vector2i res = sf::Vector2i(800, 600);
   sf::RenderWindow window(sf::VideoMode(res.x, res.y), "Dragon");
   sf::FloatRect window_bounds(sf::Vector2f(0.f, 0.f), window.getDefaultView().getSize());
+
+  // BGM
+  sf::Sound bgm;
+  // TODO:
   
   // Dragon Sprite
   DEBUG("Dragon Sprite");
   sf::Texture dragon_t;
-  dragon_t.loadFromFile("assets/dragon.png");
+  dragon_t.loadFromFile("assets/gfx/dragon.png");
   sf::Sprite dragon(dragon_t);
 
   // Fire
   DEBUG("Fire Texture");
   sf::Texture fire_t;
-  fire_t.loadFromFile("assets/fire.png");
+  fire_t.loadFromFile("assets/gfx/fire.png");
   sf::Sprite fire(fire_t);
-
+  // Fire Sound
+  sf::SoundBuffer fire_buffer;
+  sf::Sound fire_sfx;
+  fire_buffer.loadFromFile("assets/sfx/fire.wav");
+  fire_sfx.setBuffer(fire_buffer);
+  
   // Zombies
   DEBUG("Zombie Sprite");
   sf::Texture zombie_t;
-  zombie_t.loadFromFile("assets/zombie.png");
+  zombie_t.loadFromFile("assets/gfx/zombie.png");
   sf::Sprite zombie(zombie_t);
   zombie.setPosition(res.x/2, res.y/2);
   sf::Shader z_shader;
-  z_shader.loadFromFile("assets/zombie.frag", sf::Shader::Fragment);
+  z_shader.loadFromFile("assets/gfx/zombie.frag", sf::Shader::Fragment);
   float opacity = 1.0f;
   z_shader.setParameter("texture", sf::Shader::CurrentTexture);
   z_shader.setParameter("opacity", opacity);
   sf::Texture blank_zombie_dead;
   blank_zombie_dead.create(32, 32);
+  // Zombie Sound
+  sf::SoundBuffer zombie_buffer;
+  sf::Sound zombie_sfx;
+  // http://cs.klan-hub.ru/zombie/sound/zombie_plague/zombie_claw_hit3.wav
   
   // Map
   DEBUG("Map Setup");
@@ -86,12 +100,27 @@ int main(int argc, char** argv)
 	  case sf::Event::KeyPressed:
 	    switch (event.key.code)
 	      {
-	      case sf::Keyboard::Left: dir = LEFT; dragon.setScale(-1.0f, 1.0f); dragon.move(-10, 0); break;
-	      case sf::Keyboard::Right: dir = RIGHT; dragon.setScale(1.0f, 1.0f); dragon.move(10, 0); break;
-	      case sf::Keyboard::Up: dragon.move(0, -10); break;
-	      case sf::Keyboard::Down: dragon.move(0, 10); break;
-	      case sf::Keyboard::Space: blow = true;
-	      default: break;
+	      case sf::Keyboard::Left:
+		dir = LEFT;
+		dragon.setScale(-1.0f, 1.0f);
+		dragon.move(-32, 0);
+		break;
+	      case sf::Keyboard::Right:
+		dir = RIGHT;
+		dragon.setScale(1.0f, 1.0f);
+		dragon.move(32, 0);
+		break;
+	      case sf::Keyboard::Up:
+		dragon.move(0, -32);
+		break;
+	      case sf::Keyboard::Down:
+		dragon.move(0, 32);
+		break;
+	      case sf::Keyboard::Space:
+		blow = true;
+		break;
+	      default:
+		break;
 	      } break;
 	  case sf::Event::Closed: window.close();
 	  default: break;
@@ -139,9 +168,11 @@ int main(int argc, char** argv)
 	  if (fire.getGlobalBounds().intersects(zombie.getGlobalBounds()))
 	    {
 	      DEBUG("Collision!!! Zombie State: Paralysed!!!");
-	      if (hit) hit2_dead = true;
+	      if (hit) { hit2_dead = true; std::cout << "Dead!!" << std::endl; }
 	      else  hit = true;
 	    }
+	  // Play Fire Sound
+	  fire_sfx.play();
 	  // Render Fire
 	  window.draw(fire);
 	  // Only blow for 1 second
@@ -149,7 +180,7 @@ int main(int argc, char** argv)
 	}
       DEBUG("Zombie Render");
       // Render Zombie
-      if (z_clock.getElapsedTime().asSeconds() > 0.001)
+      if (z_clock.getElapsedTime().asSeconds() > 0.01)
 	{
 	  opacity -= 0.5;
 	  if (opacity < 0.0) opacity = 1.0;
@@ -159,8 +190,8 @@ int main(int argc, char** argv)
       vel = 0;
       switch (dir_z)
 	{
-	case NEG: vel = -1; break;
-	case POS: vel =  1; break;
+	case NEG: vel = -3; break;
+	case POS: vel =  3; break;
 	default: break;
 	}
       switch (move_z)
@@ -185,7 +216,7 @@ int main(int argc, char** argv)
 	  randbool(move_z);
 	}
       if (hit)
-	if (hit2_dead) zombie.setTexture(blank_zombie_dead);
+	if (hit2_dead) zombie.setTexture(blank_zombie_dead); 
 	else
 	  window.draw(zombie, &z_shader);
       else

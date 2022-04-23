@@ -2,12 +2,12 @@
 
 Map::Map()
 {
-  this->tile_sheet.loadFromFile("assets/tilemap.png");
+  this->tile_sheet.loadFromFile("assets/gfx/tilemap.png");
   this->tile.setTexture(this->tile_sheet);
   this->init();
   int map[ROWS][COLS] =
     {
-#include "assets/map1.inc"
+#include "assets/gfx/map1.inc"
     };
 }
 
