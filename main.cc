@@ -71,10 +71,15 @@ int main(int argc, char** argv)
   z_shader.setParameter("opacity", opacity);
   sf::Texture blank_zombie_dead;
   blank_zombie_dead.create(32, 32);
+  // Second Spawn Zombie
+  sf::Sprite zombie1; // TODO
+  sf::Sprite zombie2; // TODO
   // Zombie Sound
   sf::SoundBuffer zombie_buffer;
   sf::Sound zombie_sfx;
-  // http://cs.klan-hub.ru/zombie/sound/zombie_plague/zombie_claw_hit3.wav
+  zombie_buffer.loadFromFile("assets/sfx/zombie.wav");
+  zombie_sfx.setBuffer(zombie_buffer);
+  zombie_sfx.play();
   
   // Map
   DEBUG("Map Setup");
@@ -82,7 +87,7 @@ int main(int argc, char** argv)
   sf::IntRect tmp;
   
   // Runtime Variables
-  bool blow = false, dir, dir_z, move_z, hit = false, hit2_dead = false;
+  bool blow = false, dir, dir_z, move_z, hit = false, hit2_dead = false, second_spawn = false;
   randbool(dir_z);
   randbool(move_z);
   sf::Event event;
@@ -125,8 +130,6 @@ int main(int argc, char** argv)
 	  case sf::Event::Closed: window.close();
 	  default: break;
 	  }
-      // Update Zombie Opacity Shader
-      z_shader.setParameter("opacity", opacity);
       // Render to Window
       window.clear(sf::Color::Black);
       // Render Map
@@ -178,49 +181,64 @@ int main(int argc, char** argv)
 	  // Only blow for 1 second
 	  if (f_clock.getElapsedTime().asSeconds() > 1.0) { blow = false; f_clock.restart(); }
 	}
-      DEBUG("Zombie Render");
-      // Render Zombie
-      if (z_clock.getElapsedTime().asSeconds() > 0.01)
-	{
-	  opacity -= 0.5;
-	  if (opacity < 0.0) opacity = 1.0;
-	  z_clock.restart();
-	  z_shader.setParameter("opacity", opacity);
+      if (second_spawn)
+	{ // TODO: Second Spawn
 	}
-      vel = 0;
-      switch (dir_z)
-	{
-	case NEG: vel = -3; break;
-	case POS: vel =  3; break;
-	default: break;
-	}
-      switch (move_z)
-	{
-	case XMOVE:
-	  zombie.setPosition(zombie.getPosition().x+vel, zombie.getPosition().y);
-	  break;
-	case YMOVE:
-	  zombie.setPosition(zombie.getPosition().x, zombie.getPosition().y+vel);
-	  break;
-	default: break;
-	}
-      new_v--;
-      // Recalculate Velocity (if new_v == 0 or if zombie hits side)
-      if (new_v == 0 ||
-	  zombie.getPosition().x <= 0 || zombie.getPosition().x >= res.x ||
-	  zombie.getPosition().y <= 0 || zombie.getPosition().y >= res.y)
-	{
-	  DEBUG("Recalculate Velocity");
-	  new_v = (std::rand()%40);
-	  randbool(dir_z);
-	  randbool(move_z);
-	}
-      if (hit)
-	if (hit2_dead) zombie.setTexture(blank_zombie_dead); 
-	else
-	  window.draw(zombie, &z_shader);
       else
-	  window.draw(zombie);
+	{
+	  // Render Zombie
+	  DEBUG("Zombie Render");
+	  // Update Zombie Opacity Shader
+	  z_shader.setParameter("opacity", opacity);
+	  if (z_clock.getElapsedTime().asSeconds() > 0.01)
+	    {
+	      opacity -= 0.5;
+	      if (opacity < 0.0) opacity = 1.0;
+	      z_clock.restart();
+	      z_shader.setParameter("opacity", opacity);
+	    }
+	  vel = 0;
+	  switch (dir_z)
+	    {
+	    case NEG: vel = -3; break;
+	    case POS: vel =  3; break;
+	    default: break;
+	    }
+	  switch (move_z)
+	    {
+	    case XMOVE:
+	      zombie.setPosition(zombie.getPosition().x+vel, zombie.getPosition().y);
+	      break;
+	    case YMOVE:
+	      zombie.setPosition(zombie.getPosition().x, zombie.getPosition().y+vel);
+	      break;
+	    default: break;
+	    }
+	  new_v--;
+	  // Recalculate Velocity (if new_v == 0 or if zombie hits side)
+	  if (new_v == 0 ||
+	      zombie.getPosition().x <= 0 || zombie.getPosition().x >= res.x ||
+	      zombie.getPosition().y <= 0 || zombie.getPosition().y >= res.y)
+	    {
+	      DEBUG("Recalculate Velocity");
+	      new_v = (std::rand()%40);
+	      randbool(dir_z);
+	      randbool(move_z);
+	    }
+	  if (hit)
+	    if (hit2_dead)
+	      {
+		second_spawn = true;
+		zombie.setTexture(blank_zombie_dead);
+	      }
+	    else
+	      {
+		zombie_sfx.play();
+		window.draw(zombie, &z_shader);
+	      }
+	  else
+	    window.draw(zombie);
+	}
       // Render Window
       window.display();
     }
