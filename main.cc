@@ -74,8 +74,8 @@ int main(int argc, char** argv)
   sf::Texture blank_zombie_dead;
   blank_zombie_dead.create(32, 32);
   // Second Spawn Zombie
-  sf::Sprite zombie1; // TODO
-  sf::Sprite zombie2; // TODO
+  sf::Sprite zombie1(zombie_t);
+  sf::Sprite zombie2(zombie_t);
   // Zombie Sound
   sf::SoundBuffer zombie_buffer;
   sf::Sound zombie_sfx;
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
   sf::Event event;
   sf::Clock f_clock, z_clock;
   int new_v = (std::rand()%40), vel = 0;
-
+  
   // Gameloop
   DEBUG("Gameloop");
   while (window.isOpen())
@@ -185,7 +185,12 @@ int main(int argc, char** argv)
 	  if (f_clock.getElapsedTime().asSeconds() > 1.0) { blow = false; f_clock.restart(); }
 	}
       if (second_spawn)
-	{ // TODO: Second Spawn
+	{
+	  zombie1.setPosition(zombie.getPosition().x+32, zombie.getPosition().y);
+	  zombie2.setPosition(zombie.getPosition().x, zombie.getPosition().y+32);
+	  zombie_sfx.play();
+	  window.draw(zombie1);
+	  window.draw(zombie2);
 	}
       else
 	{
