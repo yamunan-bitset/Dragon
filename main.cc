@@ -38,9 +38,11 @@ int main(int argc, char** argv)
   sf::FloatRect window_bounds(sf::Vector2f(0.f, 0.f), window.getDefaultView().getSize());
 
   // BGM
-  sf::Sound bgm;
-  // TODO:
-  
+  sf::Music bgm;
+  bgm.openFromFile("assets/sfx/bgm.wav");
+  bgm.setLoop(true);
+  bgm.play();
+
   // Dragon Sprite
   DEBUG("Dragon Sprite");
   sf::Texture dragon_t;
@@ -170,6 +172,7 @@ int main(int argc, char** argv)
 	  DEBUG("Collision Detection");
 	  if (fire.getGlobalBounds().intersects(zombie.getGlobalBounds()))
 	    {
+	      zombie_sfx.play();
 	      DEBUG("Collision!!! Zombie State: Paralysed!!!");
 	      if (hit) { hit2_dead = true; std::cout << "Dead!!" << std::endl; }
 	      else  hit = true;
@@ -200,8 +203,8 @@ int main(int argc, char** argv)
 	  vel = 0;
 	  switch (dir_z)
 	    {
-	    case NEG: vel = -3; break;
-	    case POS: vel =  3; break;
+	    case NEG: vel = -1; break;
+	    case POS: vel =  1; break;
 	    default: break;
 	    }
 	  switch (move_z)
@@ -231,13 +234,8 @@ int main(int argc, char** argv)
 		second_spawn = true;
 		zombie.setTexture(blank_zombie_dead);
 	      }
-	    else
-	      {
-		zombie_sfx.play();
-		window.draw(zombie, &z_shader);
-	      }
-	  else
-	    window.draw(zombie);
+	    else window.draw(zombie, &z_shader);
+	  else window.draw(zombie);
 	}
       // Render Window
       window.display();
